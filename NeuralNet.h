@@ -1,10 +1,9 @@
-#ifndef NEURAL_NET_H
-#define NEURAL_NET_H
+#pragma once
 
-#include <fstream>
 #include <vector>
+#include <ostream>
 
-enum
+enum class NN_ERROR
 {
     eERROR_FILE_NOT_FOUND = 0,
     eERROR_DIFFERENT_CFG
@@ -13,35 +12,17 @@ enum
 class NeuralNet
 {
 public:
-    NeuralNet( )
-    {
-    }
-    NeuralNet( int n, int m = 0 );
-    int
-    GetNumInputs( ) const
-    {
-        return fNumInputs;
-    }
-    int
-    GetNumHidden( ) const
-    {
-        return fNumHidden;
-    }
+    NeuralNet( );
 
-    double
-    GetFitness( ) const
-    {
-        return fFitness;
-    }
-    void
-    SetFitness( double val )
-    {
-        fFitness = val;
-    }
+    NeuralNet( int num_inputs, int num_hidden = 0 );
 
-    double activate( std::vector< double >& v );
-    void Mutate( );
-    bool Save( const char* );
+    int get_num_inputs( ) const;
+    int get_num_hidden( ) const;
+    double get_fitness( ) const;
+    void set_fitness( double val );
+    double activate( const std::vector< double >& v ) const;
+    void mutate( );
+    bool save( const char* );
     static NeuralNet Load( const char* );
 
     friend NeuralNet operator*( const NeuralNet& nn1, const NeuralNet& nn2 );
@@ -49,18 +30,8 @@ public:
     friend std::ostream& operator<<( std::ostream& out, NeuralNet& nn );
 
 private:
-    std::vector< double > fWeights;
-    int fNumInputs;
-    int fNumHidden;
-    double fFitness;
-    static double fMutationRate;
-    static double fMaxPerturbation;
-
-    static double GetRandomNumber( );
-    static double GetRandomWeight( );
-    static double Tanh( double x );
-    static double Sigmoid( double x );
-    static bool AreEqualWithEpsilon( double x, double y );
+    std::vector< double > m_weights;
+    int m_num_inputs;
+    int m_num_hidden;
+    double m_fitness;
 };
-
-#endif
