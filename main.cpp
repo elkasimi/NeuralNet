@@ -70,8 +70,7 @@ run_simulation( )
 
     for ( const auto& name : names )
     {
-        NeuralNet neural_net = NeuralNet::load( name );
-        base.push_back( neural_net );
+        base.push_back( NeuralNet::load( name ) );
     }
 
     int epoches;
@@ -86,26 +85,30 @@ run_simulation( )
         {
             for ( int j = i + 1; j < N; ++j )
             {
-                NeuralNet nn1 = base[ i ] * base[ j ];
-                NeuralNet nn2 = base[ j ] * base[ i ];
-                nn1.mutate( );
-                nn2.mutate( );
-                neural_nets.push_back( nn1 );
-                neural_nets.push_back( nn2 );
+                NeuralNet first_baby = base[ i ] * base[ j ];
+                NeuralNet second_baby = base[ j ] * base[ i ];
+                first_baby.mutate( );
+                second_baby.mutate( );
+                neural_nets.push_back( first_baby );
+                neural_nets.push_back( second_baby );
             }
         }
 
+        std::cerr << neural_nets.size() << " babies created" << std::endl;
+
         for ( auto& neural_net : neural_nets )
         {
-            Position pos( WIDTH, HEIGTH );
-            while ( !pos.end_game( ) )
+            std::cerr << neural_net << std::endl;
+
+            Position position( WIDTH, HEIGTH );
+            while ( !position.end_game( ) )
             {
-                Direction dir = AI::get_best_direction( pos, neural_net );
-                pos.set_direction( dir );
-                pos.move( );
-                // pos.Display();
+                Direction dir = AI::get_best_direction( position, neural_net );
+                position.set_direction( dir );
+                position.move( );
+                // position.display();
             }
-            double fitness = pos.get_score( ) + 0.001 * pos.get_life( );
+            double fitness = position.get_score( ) + 0.001 * position.get_life( );
             neural_net.set_fitness( fitness );
         }
 

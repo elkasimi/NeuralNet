@@ -1,8 +1,9 @@
+#include <limits>
+#include <iostream>
+
 #include "AI.h"
 #include "NeuralNet.h"
 #include "Position.h"
-
-#include <limits>
 
 Direction
 AI::get_best_direction( const Position& position, const NeuralNet& nueral_net )

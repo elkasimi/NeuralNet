@@ -137,6 +137,8 @@ NeuralNet::activate( const std::vector< double >& v ) const
     x += *it++;
     double res = tan_h( x );
 
+    std::cerr << "res=" << res << std::endl;
+
     return res;
 }
 
@@ -191,8 +193,7 @@ NeuralNet::load( const std::string& file_name )
     }
     else
     {
-        // std::cerr << "loading neural net from file " << fileName <<
-        // std::endl;
+        std::cerr << "loading neural net from file " << file_name << std::endl;
         in.read( (char*)&nn.m_num_inputs, sizeof( int ) );
         in.read( (char*)&nn.m_num_hidden, sizeof( int ) );
         int totalWeights
@@ -209,18 +210,19 @@ NeuralNet::load( const std::string& file_name )
     }
 }
 
-NeuralNet operator*( const NeuralNet& nn1, const NeuralNet& nn2 )
+NeuralNet operator*( const NeuralNet& lhs, const NeuralNet& rhs )
 {
     NeuralNet baby;
-    baby.m_num_inputs = nn1.m_num_inputs;
-    baby.m_num_hidden = nn1.m_num_hidden;
-    int totalWeights = nn1.m_weights.size( );
-    double ratio = 0.5;
-
-    if ( !are_equal_with_epsilon( nn1.get_fitness( ) + nn2.get_fitness( ), 0 ) )
+    baby.m_num_inputs = lhs.m_num_inputs;
+    baby.m_num_hidden = lhs.m_num_hidden;
+    int totalWeights = lhs.m_weights.size( );
+    auto ratio = 0.5;
+    const auto lhs_fitness = lhs.get_fitness( );
+    const auto rhs_fitness = rhs.get_fitness( );
+    const auto sum_fitness = lhs_fitness + rhs_fitness;
+    if ( !are_equal_with_epsilon( sum_fitness, 0.0 ) )
     {
-        ratio
-            = nn1.get_fitness( ) / ( nn1.get_fitness( ) + nn2.get_fitness( ) );
+        ratio = lhs_fitness / sum_fitness;
     }
 
     for ( int i = 0; i < totalWeights; ++i )
@@ -228,11 +230,11 @@ NeuralNet operator*( const NeuralNet& nn1, const NeuralNet& nn2 )
         double r = get_random_number( );
         if ( r < ratio )
         {
-            baby.m_weights.push_back( nn1.m_weights[ i ] );
+            baby.m_weights.push_back( lhs.m_weights[ i ] );
         }
         else
         {
-            baby.m_weights.push_back( nn2.m_weights[ i ] );
+            baby.m_weights.push_back( rhs.m_weights[ i ] );
         }
     }
 
