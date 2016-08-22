@@ -1,7 +1,8 @@
 #pragma once
 
-#include <vector>
 #include <ostream>
+#include <string>
+#include <vector>
 
 enum class NN_ERROR
 {
@@ -22,8 +23,8 @@ public:
     void set_fitness( double val );
     double activate( const std::vector< double >& v ) const;
     void mutate( );
-    bool save( const char* );
-    static NeuralNet Load( const char* );
+    bool save( const std::string& file_name ) const;
+    static NeuralNet load( const std::string& file_name );
 
     friend NeuralNet operator*( const NeuralNet& nn1, const NeuralNet& nn2 );
     friend bool operator==( const NeuralNet& nn1, const NeuralNet& nn2 );

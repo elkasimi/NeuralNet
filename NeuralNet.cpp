@@ -68,6 +68,10 @@ are_equal_with_epsilon( double x, double y )
 }
 }
 
+NeuralNet::NeuralNet( )
+{
+}
+
 NeuralNet::NeuralNet( int num_inputs, int num_hidden )
 {
     m_num_inputs = num_inputs;
@@ -141,22 +145,22 @@ NeuralNet::mutate( )
 {
     for ( auto& weight : m_weights )
     {
-        double r1 = get_random_number();
+        double r1 = get_random_number( );
         if ( r1 < MUTATION_RATE )
         {
-            double r2 = get_random_weight();
+            double r2 = get_random_weight( );
             weight += r2 * MAX_PERTURBATION;
         }
     }
 }
 
 bool
-NeuralNet::save( const char* fileName )
+NeuralNet::save( const std::string& file_name ) const
 {
-    std::ofstream out( fileName, std::ios::out | std::ios::binary );
+    std::ofstream out( file_name.c_str( ), std::ios::out | std::ios::binary );
     if ( !out )
     {
-        std::cerr << "Can't open file " << fileName << std::endl;
+        std::cerr << "Can't open file " << file_name << std::endl;
         return false;
     }
     else
@@ -176,13 +180,13 @@ NeuralNet::save( const char* fileName )
 }
 
 NeuralNet
-NeuralNet::Load( const char* fileName )
+NeuralNet::load( const std::string& file_name )
 {
     NeuralNet nn;
-    std::ifstream in( fileName, std::ios::in | std::ios::binary );
+    std::ifstream in( file_name.c_str( ), std::ios::in | std::ios::binary );
     if ( !in )
     {
-        std::cerr << "Can't open file %s\n" << fileName << std::endl;
+        std::cerr << "Can't open file %s\n" << file_name << std::endl;
         return false;
     }
     else
@@ -213,14 +217,15 @@ NeuralNet operator*( const NeuralNet& nn1, const NeuralNet& nn2 )
     int totalWeights = nn1.m_weights.size( );
     double ratio = 0.5;
 
-    if ( !are_equal_with_epsilon( nn1.get_fitness() + nn2.get_fitness(), 0 ) )
+    if ( !are_equal_with_epsilon( nn1.get_fitness( ) + nn2.get_fitness( ), 0 ) )
     {
-        ratio = nn1.get_fitness() / ( nn1.get_fitness() + nn2.get_fitness() );
+        ratio
+            = nn1.get_fitness( ) / ( nn1.get_fitness( ) + nn2.get_fitness( ) );
     }
 
     for ( int i = 0; i < totalWeights; ++i )
     {
-        double r = get_random_number();
+        double r = get_random_number( );
         if ( r < ratio )
         {
             baby.m_weights.push_back( nn1.m_weights[ i ] );
