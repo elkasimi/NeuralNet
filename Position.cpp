@@ -5,109 +5,167 @@
 
 #include "Position.h"
 
-int Position::fMaxLife = 1000;
+namespace
+{
+const int32_t MAX_LIFE = 1000;
+}
+
+Position::Position( int width, int heigth )
+    : m_width( width )
+    , m_heigth( heigth )
+    , m_score( 0 )
+    , m_life( 0 )
+    , m_food( m_width / 2, m_heigth / 2 )
+    , m_direction( Direction::RIGHT )
+
+{
+}
+
+int
+Position::get_width( ) const
+{
+    return m_width;
+}
+
+int
+Position::get_heigth( ) const
+{
+    return m_heigth;
+}
+
+Direction
+Position::get_direction( ) const
+{
+    return m_direction;
+}
+
+int
+Position::get_score( ) const
+{
+    return m_score;
+}
+
+int
+Position::get_life( ) const
+{
+    return m_life;
+}
+
+void
+Position::set_direction( Direction dir )
+{
+    if ( dir != Direction::PASS )
+    {
+        m_direction = dir;
+    }
+}
 
 void
 Position::move( )
 {
-    int dx = 0, dy = 0;
-    switch ( fDirection )
+    int32_t dx = 0, dy = 0;
+    switch ( m_direction )
     {
-    case RIGHT:
+    case Direction::RIGHT:
         dx = 1;
         break;
-    case LEFT:
+    case Direction::LEFT:
         dx = -1;
         break;
-    case UP:
+    case Direction::UP:
         dy = -1;
         break;
-    case DOWN:
+    case Direction::DOWN:
         dy = 1;
         break;
     default:
         break;
     }
 
-    fSnake.x += dx;
-    fSnake.y += dy;
+    m_snake.x += dx;
+    m_snake.y += dy;
 
-    if ( fSnake.x == fFood.x && fSnake.y == fFood.y )
+    if ( m_snake.x == m_food.x && m_snake.y == m_food.y )
     {
-        GenerateNewFood( );
-        ++fScore;
+        generate_new_food( );
+        ++m_score;
     }
 
-    ++fLife;
+    ++m_life;
 }
 
 void
-Position::GenerateNewFood( )
+Position::generate_new_food( )
 {
-    fFood.x = rand( ) % fWidth;
-    fFood.y = rand( ) % fHeigth;
-    while ( fFood.x == fSnake.x && fFood.y == fSnake.y )
+    m_food.x = rand( ) % m_width;
+    m_food.y = rand( ) % m_heigth;
+    while ( m_food.x == m_snake.x && m_food.y == m_snake.y )
     {
-        fFood.x = rand( ) % fWidth;
-        fFood.y = rand( ) % fHeigth;
+        m_food.x = rand( ) % m_width;
+        m_food.y = rand( ) % m_heigth;
     }
 }
 
 void
-Position::Display( )
+Position::display( )
 {
-    system( "clear" );
+    int32_t error = std::system( "clear" );
+    if ( error != 0 )
+    {
+        std::cerr << "error when clearing screen!" << error << std::endl;
+    }
+
     std::vector< std::string > v;
     std::string s = "";
-    s.append( fWidth, '.' );
-    for ( int i = 0; i < fHeigth; i++ )
+    s.append( m_width, '.' );
+    for ( int i = 0; i < m_heigth; i++ )
     {
         v.push_back( s );
     }
-    v[ fFood.y ][ fFood.x ] = 'o';
-    if ( fSnake.x >= 0 && fSnake.x < fWidth && fSnake.y >= 0
-         && fSnake.y < fHeigth )
+    v[ m_food.y ][ m_food.x ] = 'o';
+    if ( m_snake.x >= 0 && m_snake.x < m_width && m_snake.y >= 0
+         && m_snake.y < m_heigth )
     {
         char c;
-        switch ( fDirection )
+        switch ( m_direction )
         {
-        case RIGHT:
+        case Direction::RIGHT:
             c = '>';
             break;
-        case LEFT:
+        case Direction::LEFT:
             c = '<';
             break;
-        case UP:
+        case Direction::UP:
             c = '^';
             break;
-        case DOWN:
+        case Direction::DOWN:
             c = 'v';
             break;
         default:
             c = '?';
             break;
         }
-        v[ fSnake.y ][ fSnake.x ] = c;
+        v[ m_snake.y ][ m_snake.x ] = c;
     }
 
-    for ( int i = 0; i < fHeigth; i++ )
+    for ( int i = 0; i < m_heigth; i++ )
     {
         std::cout << v[ i ] << std::endl;
     }
 
-    std::cout << "score = " << fScore << ", life = " << fLife << ", dir = ";
-    switch ( fDirection )
+    std::cout << "score = " << m_score << ", life = " << m_life << ", dir = ";
+    switch ( m_direction )
     {
-    case RIGHT:
+    case Direction::RIGHT:
         std::cout << "RIGHT";
         break;
-    case LEFT:
+    case Direction::LEFT:
         std::cout << "LEFT";
         break;
-    case UP:
+    case Direction::UP:
         std::cout << "UP";
         break;
-    case DOWN:
+    case Direction::DOWN:
         std::cout << "DOWN";
         break;
     default:
@@ -119,19 +177,19 @@ Position::Display( )
 }
 
 bool
-Position::EndGame( )
+Position::end_game( )
 {
-    if ( fSnake.x < 0 || fSnake.x >= fWidth )
+    if ( m_snake.x < 0 || m_snake.x >= m_width )
     {
         return true;
     }
 
-    if ( fSnake.y < 0 || fSnake.y >= fHeigth )
+    if ( m_snake.y < 0 || m_snake.y >= m_heigth )
     {
         return true;
     }
 
-    if ( fLife >= fMaxLife )
+    if ( m_life >= MAX_LIFE )
     {
         return true;
     }
@@ -140,10 +198,10 @@ Position::EndGame( )
 }
 
 std::vector< double >
-Position::get_neural_net_input( )
+Position::get_neural_net_input( ) const
 {
     std::vector< double > res;
-    if ( fSnake.x < fWidth )
+    if ( m_snake.x < m_width )
     {
         res.push_back( 1.0 );
     }
@@ -151,7 +209,8 @@ Position::get_neural_net_input( )
     {
         res.push_back( 0.0 );
     }
-    if ( fSnake.x >= 0 )
+
+    if ( m_snake.x >= 0 )
     {
         res.push_back( 1.0 );
     }
@@ -159,7 +218,8 @@ Position::get_neural_net_input( )
     {
         res.push_back( 0.0 );
     }
-    if ( fSnake.y < fHeigth )
+
+    if ( m_snake.y < m_heigth )
     {
         res.push_back( 1.0 );
     }
@@ -167,7 +227,8 @@ Position::get_neural_net_input( )
     {
         res.push_back( 0.0 );
     }
-    if ( fSnake.y >= 0 )
+
+    if ( m_snake.y >= 0 )
     {
         res.push_back( 1.0 );
     }
@@ -175,7 +236,8 @@ Position::get_neural_net_input( )
     {
         res.push_back( 0.0 );
     }
-    if ( fSnake.x < fFood.x )
+
+    if ( m_snake.x < m_food.x )
     {
         res.push_back( 1.0 );
     }
@@ -183,7 +245,8 @@ Position::get_neural_net_input( )
     {
         res.push_back( 0.0 );
     }
-    if ( fSnake.y < fFood.y )
+
+    if ( m_snake.y < m_food.y )
     {
         res.push_back( 1.0 );
     }
@@ -191,21 +254,22 @@ Position::get_neural_net_input( )
     {
         res.push_back( 0.0 );
     }
-    switch ( fDirection )
+
+    switch ( m_direction )
     {
-    case RIGHT:
+    case Direction::RIGHT:
         res.push_back( 0.0 );
         res.push_back( 0.0 );
         break;
-    case LEFT:
+    case Direction::LEFT:
         res.push_back( 0.0 );
         res.push_back( 1.0 );
         break;
-    case UP:
+    case Direction::UP:
         res.push_back( 1.0 );
         res.push_back( 0.0 );
         break;
-    case DOWN:
+    case Direction::DOWN:
         res.push_back( 1.0 );
         res.push_back( 1.0 );
         break;
@@ -218,28 +282,23 @@ Position::get_neural_net_input( )
 }
 
 std::vector< Direction >
-Position::get_possible_directions( )
+Position::get_possible_directions( ) const
 {
     std::vector< Direction > res;
-    switch ( fDirection )
+    switch ( m_direction )
     {
-    case RIGHT:
-    case LEFT:
-        res.push_back( UP );
-        res.push_back( DOWN );
-        res.push_back( PASS );
-        break;
-    case UP:
-    case DOWN:
-        res.push_back( RIGHT );
-        res.push_back( LEFT );
-        res.push_back( PASS );
-        break;
+    case Direction::RIGHT:
+    case Direction::LEFT:
+        return {Direction::UP, Direction::DOWN, Direction::PASS};
+
+    case Direction::UP:
+    case Direction::DOWN:
+        return {Direction::RIGHT, Direction::LEFT, Direction::PASS};
 
     default:
         std::cerr << "Unknown direction" << std::endl;
         throw 1;
     }
 
-    return res;
+    return {};
 }

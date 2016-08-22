@@ -15,13 +15,17 @@ enum class Direction
 struct Square
 {
     Square( )
+        : x( 0 )
+        , y( 0 )
     {
     }
+
     Square( int x, int y )
         : x( x )
         , y( y )
     {
     }
+
     bool
     operator<( const Square& rhs ) const
     {
@@ -41,68 +45,31 @@ struct Square
 class Position
 {
 public:
-    Position( int width, int heigth )
-        : fWidth( width )
-        , fHeigth( heigth )
-        , fDirection( RIGHT )
-        , fScore( 0 )
-        , fLife( 0 )
-    {
-        fSnake = Square( 0, 0 );
-        int startFoodX = fWidth / 2;
-        int startFoodY = fHeigth / 2;
-        fFood = Square( startFoodX, startFoodY );
-    }
+    Position( int width, int heigth );
 
-    int
-    GetWidth( )
-    {
-        return fWidth;
-    }
-    int
-    GetHeigth( )
-    {
-        return fHeigth;
-    }
-    int
-    GetDirection( )
-    {
-        return fDirection;
-    }
-    int
-    GetScore( )
-    {
-        return fScore;
-    }
-    int
-    GetLife( )
-    {
-        return fLife;
-    }
-    void
-    SetDirection( Direction dir )
-    {
-        if ( dir != PASS )
-        {
-            fDirection = dir;
-        }
-    }
+    int get_width( ) const;
+    int get_heigth( ) const;
+    Direction get_direction( ) const;
+    int get_score( ) const;
+    int get_life( ) const;
+
+    void set_direction( Direction dir );
+
     void move( );
-    void GenerateNewFood( );
-    void Display( );
-    bool EndGame( );
-    std::vector< double > get_neural_net_input( );
-    std::vector< Direction > get_possible_directions( );
+    void generate_new_food( );
+    void display( );
+    bool end_game( );
+    std::vector< double > get_neural_net_input( ) const;
+    std::vector< Direction > get_possible_directions( ) const;
 
 private:
-    Square fFood;
-    Square fSnake;
-    int fWidth;
-    int fHeigth;
-    Direction fDirection;
-    int fScore;
-    int fLife;
-    static int fMaxLife;
+    int m_width;
+    int m_heigth;
+    int m_score;
+    int m_life;
+    Square m_snake;
+    Square m_food;
+    Direction m_direction;
 };
 
 #endif
