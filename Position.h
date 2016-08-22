@@ -3,7 +3,8 @@
 
 #include <vector>
 
-enum Direction {
+enum class Direction
+{
     RIGHT = 0,
     LEFT,
     UP,
@@ -11,16 +12,25 @@ enum Direction {
     PASS
 };
 
-struct Square {
-    Square()
-    {}
-    Square(int x, int y) :
-        x(x), y(y)
-    {}
-    bool operator <(const Square &rhs) const {
-        if (x != rhs.x) {
+struct Square
+{
+    Square( )
+    {
+    }
+    Square( int x, int y )
+        : x( x )
+        , y( y )
+    {
+    }
+    bool
+    operator<( const Square& rhs ) const
+    {
+        if ( x != rhs.x )
+        {
             return x < rhs.x;
-        } else {
+        }
+        else
+        {
             return y < rhs.y;
         }
     }
@@ -28,42 +38,61 @@ struct Square {
     int y;
 };
 
-class Position {
+class Position
+{
 public:
-    Position(int width, int heigth) :
-        fWidth(width), fHeigth(heigth), fDirection(RIGHT), fScore(0), fLife(0) {
-        fSnake = Square(0, 0);
+    Position( int width, int heigth )
+        : fWidth( width )
+        , fHeigth( heigth )
+        , fDirection( RIGHT )
+        , fScore( 0 )
+        , fLife( 0 )
+    {
+        fSnake = Square( 0, 0 );
         int startFoodX = fWidth / 2;
         int startFoodY = fHeigth / 2;
-        fFood = Square(startFoodX, startFoodY);
+        fFood = Square( startFoodX, startFoodY );
     }
 
-    int GetWidth() {
+    int
+    GetWidth( )
+    {
         return fWidth;
     }
-    int GetHeigth() {
+    int
+    GetHeigth( )
+    {
         return fHeigth;
     }
-    int GetDirection() {
+    int
+    GetDirection( )
+    {
         return fDirection;
     }
-    int GetScore() {
+    int
+    GetScore( )
+    {
         return fScore;
     }
-    int GetLife() {
+    int
+    GetLife( )
+    {
         return fLife;
     }
-    void SetDirection(Direction dir) {
-        if(dir != PASS) {
+    void
+    SetDirection( Direction dir )
+    {
+        if ( dir != PASS )
+        {
             fDirection = dir;
         }
     }
-    void Move();
-    void GenerateNewFood();
-    void Display();
-    bool EndGame();
-    std::vector<double> GetNNInput();
-    std::vector<Direction> GetPossibleDirections();
+    void move( );
+    void GenerateNewFood( );
+    void Display( );
+    bool EndGame( );
+    std::vector< double > get_neural_net_input( );
+    std::vector< Direction > get_possible_directions( );
 
 private:
     Square fFood;

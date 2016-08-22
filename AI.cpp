@@ -1,22 +1,29 @@
 #include "AI.h"
+#include "NeuralNet.h"
+#include "Position.h"
 
-Direction AI::GetBestDirection(Position &pos, NeuralNet &nn) {
-    std::vector<Direction> directions = pos.GetPossibleDirections();
-    Direction bestDirection = PASS;
-    double bestValue = -1E9;
-    int dirSize = (int) directions.size();
-    for (int i = 0; i < dirSize; ++i) {
-        Position tmp = pos;
-        Direction &dir = directions[i];
-        tmp.SetDirection(dir);
-        tmp.Move();
-        std::vector<double> v = tmp.GetNNInput();
-        double value = nn.Activate(v);
-        if (bestValue < value) {
-            bestValue = value;
-            bestDirection = dir;
+#include <limits>
+
+Direction
+AI::get_best_direction( const Position& position, const NeuralNet& nueral_net )
+{
+    const auto directions = position.get_possible_directions( );
+    Direction best_direction = PASS;
+    double best_value = -std::numeric_limits< double >::infinity( );
+
+    for ( auto direction : directions )
+    {
+        auto tmp_position = position;
+        tmp_position.set_direction( direction );
+        tmp_position.move( );
+        const auto v = tmp_position.get_neural_net_input( );
+        double value = nueral_net.activate( v );
+        if ( best_value < value )
+        {
+            best_value = value;
+            best_direction = direction;
         }
     }
 
-    return bestDirection;
+    return best_direction;
 }

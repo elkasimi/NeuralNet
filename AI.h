@@ -1,12 +1,13 @@
-#ifndef _AI_H
-#define _AI_H
+#pragma once
 
-#include "NeuralNet.h"
-#include "Position.h"
+class Position;
+class NeuralNet;
 
-class AI {
+enum class Direction;
+
+class AI
+{
 public:
-    static Direction GetBestDirection(Position &pos, NeuralNet &nn);
+    static Direction get_best_direction( const Position& position,
+                                         const NeuralNet& nueral_net );
 };
-
-#endif
