@@ -1,78 +1,77 @@
-#include <unistd.h>
 #include <algorithm>
+#include <chrono>
 #include <iostream>
 #include <string>
+#include <thread>
+#include <vector>
 
 #include "AI.h"
+#include "NeuralNet.h"
+#include "Position.h"
 
-#define NEURAL_NET_INPUTS 8
-#define WIDTH 10
-#define HEIGTH 10
-#define N 10
-
-struct NeuralNetCmp
+namespace
 {
-    bool
-    operator( )( const NeuralNet& lhs, const NeuralNet& rhs ) const
-    {
-        return lhs.GetFitness( ) > rhs.GetFitness( );
-    }
-} NeuralNetCmpObj;
-
-const char* names[]
-    = {"gamer0.nn", "gamer1.nn", "gamer2.nn", "gamer3.nn", "gamer4.nn",
-       "gamer5.nn", "gamer6.nn", "gamer7.nn", "gamer8.nn", "gamer9.nn"};
+const int32_t NEURAL_NET_INPUTS = 8;
+const int32_t WIDTH = 10;
+const int32_t HEIGTH = 10;
+const int32_t N = 10;
+const auto TICK_TIME = std::chrono::milliseconds( 4 );
+const std::vector< std::string > names{
+    "game0.nn", "game1.nn", "game2.nn", "game3.nn", "game4.nn",
+    "game5.nn", "game6.nn", "game7.nn", "game8.nn", "game9.nn",
+};
+}
 
 void
-InitSimulation( )
+init_simulation( )
 {
-    for ( int i = 0; i < N; ++i )
+    for ( const auto& name : names )
     {
-        NeuralNet nn( NEURAL_NET_INPUTS );
-        nn.Save( names[ i ] );
+        NeuralNet neural_net( NEURAL_NET_INPUTS );
+        neural_net.save( name );
     }
 }
 
 void
-ComputeXorError( NeuralNet& nn )
+compute_xor_error( NeuralNet& neural_net )
 {
     double error = 0.0;
     std::vector< double > inputs;
     inputs.push_back( 0.0 );
     inputs.push_back( 0.0 );
-    double a = nn.Activate( inputs );
+    double a = neural_net.activate( inputs );
     error += 10000 * a * a;
     //////////////////
     inputs.clear( );
     inputs.push_back( 1.0 );
     inputs.push_back( 1.0 );
-    a = nn.Activate( inputs );
+    a = neural_net.activate( inputs );
     error += 10000 * a * a;
     //////////////////
     inputs.clear( );
     inputs.push_back( 0.0 );
     inputs.push_back( 1.0 );
-    a = nn.Activate( inputs );
+    a = neural_net.activate( inputs );
     error += 10000 * ( a - 1 ) * ( a - 1 );
     //////////////////
     inputs.clear( );
     inputs.push_back( 1.0 );
     inputs.push_back( 0.0 );
-    a = nn.Activate( inputs );
+    a = neural_net.activate( inputs );
     error += 10000 * ( a - 1 ) * ( a - 1 );
     double fitness = 1 / error;
-    nn.SetFitness( fitness );
+    neural_net.set_fitness( fitness );
 }
 
 void
-RunSimulation( )
+run_simulation( )
 {
     std::vector< NeuralNet > base;
 
-    for ( int i = 0; i < N; ++i )
+    for ( const auto& name : names )
     {
-        NeuralNet nn = NeuralNet::Load( names[ i ] );
-        base.push_back( nn );
+        NeuralNet neural_net = NeuralNet::load( name );
+        base.push_back( neural_net );
     }
 
     int epoches;
@@ -82,61 +81,58 @@ RunSimulation( )
     for ( int g = 0; g < epoches; ++g )
     {
         std::cout << "Generation " << g + 1 << std::endl;
-        std::vector< NeuralNet > v;
+        std::vector< NeuralNet > neural_nets;
         for ( int i = 0; i < N; ++i )
         {
             for ( int j = i + 1; j < N; ++j )
             {
                 NeuralNet nn1 = base[ i ] * base[ j ];
                 NeuralNet nn2 = base[ j ] * base[ i ];
-                nn1.Mutate( );
-                nn2.Mutate( );
-                v.push_back( nn1 );
-                v.push_back( nn2 );
+                nn1.mutate( );
+                nn2.mutate( );
+                neural_nets.push_back( nn1 );
+                neural_nets.push_back( nn2 );
             }
         }
 
-        for ( int i = 0; i < N; ++i )
-        {
-            v.push_back( base[ i ] );
-        }
-
-        for ( std::vector< NeuralNet >::iterator it = v.begin( );
-              it != v.end( ); ++it )
+        for ( auto& neural_net : neural_nets )
         {
             Position pos( WIDTH, HEIGTH );
-            while ( !pos.EndGame( ) )
+            while ( !pos.end_game( ) )
             {
-                Direction dir = AI::GetBestDirection( pos, *it );
-                pos.SetDirection( dir );
-                pos.Move( );
+                Direction dir = AI::get_best_direction( pos, neural_net );
+                pos.set_direction( dir );
+                pos.move( );
                 // pos.Display();
             }
-            double fitness = pos.GetScore( ) + 0.001 * pos.GetLife( );
-            it->SetFitness( fitness );
+            double fitness = pos.get_score( ) + 0.001 * pos.get_life( );
+            neural_net.set_fitness( fitness );
         }
 
-        sort( v.begin( ), v.end( ), NeuralNetCmpObj );
+        std::sort( neural_nets.begin( ), neural_nets.end( ),
+                   []( const NeuralNet& lhs, const NeuralNet& rhs ) {
+                       return lhs.get_fitness( ) > rhs.get_fitness( );
+                   } );
 
-        for ( int i = 0; i < N; ++i )
-        {
-            base[ i ] = v[ i ];
-        }
+        base = std::vector< NeuralNet >( neural_nets.begin( ),
+                                         neural_nets.begin( ) + N );
 
-        for ( int i = 0; i < N; ++i )
+        int32_t count = 0;
+        for ( const auto& neural_net : base )
         {
-            base[ i ].Save( names[ i ] );
+            neural_net.save( names[ count ] );
+
+            ++count;
         }
 
         if ( g == epoches - 1 )
         {
             std::cout << "Player\t\tFitness" << std::endl;
             int i = 0;
-            for ( std::vector< NeuralNet >::iterator it = v.begin( );
-                  it != v.end( ); ++it )
+            for ( const auto& neural_net : base )
             {
-                double fitness = it->GetFitness( );
-                std::cout << ++i << "\t\t" << fitness << std::endl;
+                std::cout << ++i << "\t\t" << neural_net.get_fitness( )
+                          << std::endl;
             }
         }
     }
@@ -158,26 +154,26 @@ main( )
 
     if ( action == "init" )
     {
-        InitSimulation( );
+        init_simulation( );
     }
     else if ( action == "simulation" )
     {
-        RunSimulation( );
+        run_simulation( );
     }
     else
     {
-        NeuralNet nn = NeuralNet::Load( names[ 0 ] );
+        NeuralNet nn = NeuralNet::load( names[ 0 ] );
         Position pos( WIDTH, HEIGTH );
-        while ( !pos.EndGame( ) )
+        while ( !pos.end_game( ) )
         {
-            Direction dir = AI::GetBestDirection( pos, nn );
-            pos.SetDirection( dir );
-            pos.Move( );
-            pos.Display( );
-            usleep( 40000 );
+            Direction dir = AI::get_best_direction( pos, nn );
+            pos.set_direction( dir );
+            pos.move( );
+            pos.display( );
+            std::this_thread::sleep_for( TICK_TIME );
         }
-        std::cout << "score = " << pos.GetScore( )
-                  << ", life = " << pos.GetLife( ) << std::endl;
+        std::cout << "score = " << pos.get_score( )
+                  << ", life = " << pos.get_life( ) << std::endl;
     }
 
     return 0;
