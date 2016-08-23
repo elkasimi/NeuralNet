@@ -94,7 +94,7 @@ run_simulation( )
             }
         }
 
-        std::cerr << neural_nets.size() << " babies created" << std::endl;
+        std::cerr << neural_nets.size( ) << " babies created" << std::endl;
 
         for ( auto& neural_net : neural_nets )
         {
@@ -108,7 +108,8 @@ run_simulation( )
                 position.move( );
                 // position.display();
             }
-            double fitness = position.get_score( ) + 0.001 * position.get_life( );
+            double fitness
+                = position.get_score( ) + 0.001 * position.get_life( );
             neural_net.set_fitness( fitness );
         }
 

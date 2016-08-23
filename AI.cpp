@@ -1,5 +1,5 @@
-#include <limits>
 #include <iostream>
+#include <limits>
 
 #include "AI.h"
 #include "NeuralNet.h"

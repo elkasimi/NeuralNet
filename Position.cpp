@@ -109,20 +109,18 @@ Position::generate_new_food( )
 void
 Position::display( ) const
 {
+    //! TODO use a graphic engine
+
     int32_t error = std::system( "clear" );
     if ( error != 0 )
     {
         std::cerr << "error when clearing screen!" << error << std::endl;
     }
 
-    std::vector< std::string > v;
-    std::string s = "";
-    s.append( m_width, '.' );
-    for ( int i = 0; i < m_heigth; i++ )
-    {
-        v.push_back( s );
-    }
+    std::vector< std::string > v( m_heigth, std::string( m_width, '.' ) );
+
     v[ m_food.y ][ m_food.x ] = 'o';
+
     if ( m_snake.x >= 0 && m_snake.x < m_width && m_snake.y >= 0
          && m_snake.y < m_heigth )
     {
@@ -148,9 +146,9 @@ Position::display( ) const
         v[ m_snake.y ][ m_snake.x ] = c;
     }
 
-    for ( int i = 0; i < m_heigth; i++ )
+    for ( const auto& s : v )
     {
-        std::cout << v[ i ] << std::endl;
+        std::cout << s << std::endl;
     }
 
     std::cout << "score = " << m_score << ", life = " << m_life << ", dir = ";
