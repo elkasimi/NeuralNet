@@ -15,7 +15,8 @@ const int32_t NEURAL_NET_INPUTS = 8;
 const int32_t WIDTH = 10;
 const int32_t HEIGTH = 10;
 const int32_t N = 10;
-const auto TICK_TIME = std::chrono::milliseconds( 4 );
+const auto TICK_TIME = std::chrono::milliseconds( 80 );
+const auto EPOCHES_BETWEEN_DISPLAYS = 1;
 const std::vector< std::string > names{
     "game0.nn", "game1.nn", "game2.nn", "game3.nn", "game4.nn",
     "game5.nn", "game6.nn", "game7.nn", "game8.nn", "game9.nn",
@@ -56,11 +57,11 @@ compute_xor_error( NeuralNet& neural_net )
 void
 run_simulation( )
 {
-    std::vector< NeuralNet > base;
+    std::vector< NeuralNet > best_neural_nets;
 
     for ( const auto& name : names )
     {
-        base.push_back( NeuralNet::load( name ) );
+        best_neural_nets.push_back( NeuralNet::load( name ) );
     }
 
     int32_t epoches;
@@ -69,11 +70,10 @@ run_simulation( )
 
     for ( int32_t g = 0; g < epoches; ++g )
     {
-        std::cout << "Generation " << g + 1 << std::endl;
         std::vector< NeuralNet > neural_nets;
-        for ( const auto& first_neural_net : neural_nets )
+        for ( const auto& first_neural_net : best_neural_nets )
         {
-            for ( const auto& second_neural_net : neural_nets )
+            for ( const auto& second_neural_net : best_neural_nets )
             {
                 auto first_baby = first_neural_net * second_neural_net;
                 auto second_baby = second_neural_net * first_neural_net;
@@ -84,23 +84,21 @@ run_simulation( )
             }
         }
 
-        std::cerr << neural_nets.size( ) << " babies created" << std::endl;
+        neural_nets.insert( neural_nets.cend( ), best_neural_nets.cbegin( ),
+                            best_neural_nets.cend( ) );
 
         for ( auto& neural_net : neural_nets )
         {
-            std::cerr << neural_net << std::endl;
-
             Position position( WIDTH, HEIGTH );
             while ( !position.end_game( ) )
             {
-                const auto direction
-                    = AI::get_best_direction( position, neural_net );
+                const auto direction = AI::get_best_direction( position, neural_net );
                 position.set_direction( direction );
                 position.move( );
                 // position.display();
             }
-            double fitness
-                = position.get_score( ) + 0.001 * position.get_life( );
+
+            auto fitness = position.get_score( ) + 0.001 * position.get_life( );
             neural_net.set_fitness( fitness );
         }
 
@@ -109,32 +107,39 @@ run_simulation( )
                        return lhs.get_fitness( ) > rhs.get_fitness( );
                    } );
 
-        base = std::vector< NeuralNet >( neural_nets.begin( ),
-                                         neural_nets.begin( ) + N );
+        best_neural_nets
+            = std::vector< NeuralNet >( neural_nets.begin( ), neural_nets.begin( ) + N );
 
-        int32_t count = 0;
-        for ( const auto& neural_net : base )
+        auto name_iterator = names.cbegin( );
+        for ( const auto& neural_net : best_neural_nets )
         {
-            neural_net.save( names[ count ] );
+            neural_net.save( *name_iterator++ );
+        }
 
-            ++count;
+        if ( ( g + 1 ) % EPOCHES_BETWEEN_DISPLAYS == 0 )
+        {
+            std::cout << "Generation " << g + 1 << std::endl;
+            for ( const auto& neural_net : best_neural_nets )
+            {
+                std::cerr << neural_net.get_fitness( ) << " ";
+            }
+            std::cerr << std::endl;
         }
 
         if ( g == epoches - 1 )
         {
             std::cout << "Player\t\tFitness" << std::endl;
             int32_t i = 0;
-            for ( const auto& neural_net : base )
+            for ( const auto& neural_net : best_neural_nets )
             {
-                std::cout << ++i << "\t\t" << neural_net.get_fitness( )
-                          << std::endl;
+                std::cout << ++i << "\t\t" << neural_net.get_fitness( ) << std::endl;
             }
         }
     }
 }
 
-int32_t
-main( )
+int
+main( int argc, char* argv[] )
 {
     std::string action;
     std::cout << "Please enter action (init/simulation/game) :" << std::endl;
@@ -142,8 +147,7 @@ main( )
 
     while ( action != "init" && action != "simulation" && action != "game" )
     {
-        std::cout << "Please enter action (init/simulation/game) :"
-                  << std::endl;
+        std::cout << "Please enter action (init/simulation/game) :" << std::endl;
         std::cin >> action;
     }
 
@@ -167,8 +171,8 @@ main( )
             position.display( );
             std::this_thread::sleep_for( TICK_TIME );
         }
-        std::cout << "score = " << position.get_score( )
-                  << ", life = " << position.get_life( ) << std::endl;
+        std::cout << "score = " << position.get_score( ) << ", life = " << position.get_life( )
+                  << std::endl;
     }
 
     return 0;

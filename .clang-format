@@ -3,7 +3,7 @@ AccessModifierOffset: -4
 BreakBeforeBinaryOperators: true
 BreakBeforeTernaryOperators: true
 BinPackParameters: false
-ColumnLimit:     80
+ColumnLimit:     100
 DerivePointerBinding: false
 PenaltyBreakComment: 60
 IndentWidth:     4

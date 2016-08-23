@@ -8,6 +8,5 @@ enum class Direction;
 class AI
 {
 public:
-    static Direction get_best_direction( const Position& position,
-                                         const NeuralNet& nueral_net );
+    static Direction get_best_direction( const Position& position, const NeuralNet& nueral_net );
 };

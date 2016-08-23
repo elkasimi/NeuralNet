@@ -38,7 +38,7 @@ tan_h( double x )
     }
     else
     {
-        return tan_h( x );
+        return std::tanh( x );
     }
 }
 
@@ -73,17 +73,13 @@ NeuralNet::NeuralNet( )
 }
 
 NeuralNet::NeuralNet( int32_t num_inputs, int32_t num_hidden )
+    : m_num_inputs( num_hidden )
+    , m_num_hidden( num_hidden ? num_hidden : ( num_inputs / 2 + 1 ) )
+    , m_fitness( 0.0 )
+
 {
-    m_num_inputs = num_inputs;
-    if ( num_hidden == 0 )
-    {
-        num_hidden = num_inputs / 2 + 1;
-    }
-    m_num_hidden = num_hidden;
-    m_fitness = 0.0;
-    int32_t totalWeights
-        = ( m_num_inputs + 1 ) * m_num_hidden + m_num_hidden + 1;
-    for ( int32_t i = 0; i < totalWeights; ++i )
+    int32_t weights_count = ( m_num_inputs + 1 ) * m_num_hidden + m_num_hidden + 1;
+    for ( int32_t i = 0; i < weights_count; ++i )
     {
         m_weights.push_back( get_random_weight( ) );
     }
@@ -116,31 +112,28 @@ NeuralNet::set_fitness( double val )
 double
 NeuralNet::activate( const std::vector< double >& input ) const
 {
-    auto it = m_weights.cbegin( );
-    double x;
-    std::vector< double > tmp;
-    for ( int32_t i = 0; i < m_num_hidden; ++i )
+    auto weight_iterator = m_weights.cbegin( );
+
+    std::vector< double > hidden_layer( m_num_hidden, 0.0 );
+    for ( auto& hidden_node : hidden_layer )
     {
-        x = 0.0;
-        for ( int32_t j = 0; j < m_num_inputs; ++j )
+        for ( auto i : input )
         {
-            x += ( *it++ ) * input[ j ];
+            hidden_node += i * ( *weight_iterator++ );
         }
-        x += *it++;
-        tmp.push_back( tan_h( x ) );
+
+        hidden_node += *weight_iterator++;
+        hidden_node = tan_h( hidden_node );
     }
 
-    x = 0.0;
-    for ( int32_t j = 0; j < m_num_hidden; ++j )
+    auto x = 0.0;
+    for ( auto& hidden_node : hidden_layer )
     {
-        x += tmp[ j ] * ( *it++ );
+        x += hidden_node * ( *weight_iterator++ );
     }
-    x += *it++;
-    double res = tan_h( x );
+    x += *weight_iterator++;
 
-    std::cerr << "res=" << res << std::endl;
-
-    return res;
+    return tan_h( x );
 }
 
 void
@@ -148,8 +141,7 @@ NeuralNet::mutate( )
 {
     for ( auto& weight : m_weights )
     {
-        auto r = get_random_number( );
-        if ( r < MUTATION_RATE )
+        if ( get_random_number( ) < MUTATION_RATE )
         {
             weight += get_random_weight( ) * MAX_PERTURBATION;
         }
@@ -159,6 +151,8 @@ NeuralNet::mutate( )
 bool
 NeuralNet::save( const std::string& file_name ) const
 {
+    std::cerr << "saving neural net to " << file_name << std::endl;
+
     std::ofstream out( file_name.c_str( ), std::ios::out | std::ios::binary );
     if ( !out )
     {
@@ -167,7 +161,6 @@ NeuralNet::save( const std::string& file_name ) const
     }
     else
     {
-        // std::cerr << "Saving neural net to file "<< fileName << std::endl;
         out.write( (char*)&m_num_inputs, sizeof( int32_t ) );
         out.write( (char*)&m_num_hidden, sizeof( int32_t ) );
         for ( auto& weight : m_weights )
@@ -183,6 +176,7 @@ NeuralNet::save( const std::string& file_name ) const
 NeuralNet
 NeuralNet::load( const std::string& file_name )
 {
+    std::cerr << "loading neural net from " << file_name << std::endl;
     NeuralNet neural_net;
     std::ifstream in( file_name.c_str( ), std::ios::in | std::ios::binary );
     if ( !in )
@@ -192,12 +186,10 @@ NeuralNet::load( const std::string& file_name )
     }
     else
     {
-        std::cerr << "loading neural net from file " << file_name << std::endl;
         in.read( (char*)&neural_net.m_num_inputs, sizeof( int32_t ) );
         in.read( (char*)&neural_net.m_num_hidden, sizeof( int32_t ) );
-        int32_t total_weights
-            = ( neural_net.m_num_inputs + 1 ) * neural_net.m_num_hidden
-              + neural_net.m_num_hidden + 1;
+        int32_t total_weights = ( neural_net.m_num_inputs + 1 ) * neural_net.m_num_hidden
+                                + neural_net.m_num_hidden + 1;
         neural_net.m_weights = std::vector< double >( total_weights );
         for ( auto& weight : neural_net.m_weights )
         {
@@ -266,9 +258,8 @@ operator==( const NeuralNet& lhs, const NeuralNet& rhs )
     {
         if ( !are_equal_with_epsilon( lhs.m_weights[ i ], rhs.m_weights[ i ] ) )
         {
-            std::cout << i + 1 << "th weights are different "
-                      << lhs.m_weights[ i ] << " # " << rhs.m_weights[ i ]
-                      << std::endl;
+            std::cout << i + 1 << "th weights are different " << lhs.m_weights[ i ] << " # "
+                      << rhs.m_weights[ i ] << std::endl;
             return false;
         }
     }
@@ -279,8 +270,7 @@ operator==( const NeuralNet& lhs, const NeuralNet& rhs )
 std::ostream&
 operator<<( std::ostream& out, const NeuralNet& neural_net )
 {
-    out << neural_net.m_num_inputs << " " << neural_net.m_num_hidden
-        << std::endl;
+    out << neural_net.m_num_inputs << " " << neural_net.m_num_hidden << std::endl;
     for ( const auto& weight : neural_net.m_weights )
     {
         out << weight << " ";

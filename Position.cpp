@@ -121,8 +121,7 @@ Position::display( ) const
 
     v[ m_food.y ][ m_food.x ] = 'o';
 
-    if ( m_snake.x >= 0 && m_snake.x < m_width && m_snake.y >= 0
-         && m_snake.y < m_heigth )
+    if ( m_snake.x >= 0 && m_snake.x < m_width && m_snake.y >= 0 && m_snake.y < m_heigth )
     {
         char c;
         switch ( m_direction )

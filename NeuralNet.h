@@ -28,8 +28,7 @@ public:
 
     friend NeuralNet operator*( const NeuralNet& lhs, const NeuralNet& rhs );
     friend bool operator==( const NeuralNet& lhs, const NeuralNet& rhs );
-    friend std::ostream& operator<<( std::ostream& out,
-                                     const NeuralNet& neural_net );
+    friend std::ostream& operator<<( std::ostream& out, const NeuralNet& neural_net );
 
 private:
     std::vector< double > m_weights;
