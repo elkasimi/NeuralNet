@@ -107,7 +107,7 @@ Position::generate_new_food( )
 }
 
 void
-Position::display( )
+Position::display( ) const
 {
     int32_t error = std::system( "clear" );
     if ( error != 0 )
@@ -177,7 +177,7 @@ Position::display( )
 }
 
 bool
-Position::end_game( )
+Position::end_game( ) const
 {
     if ( m_snake.x < 0 || m_snake.x >= m_width )
     {

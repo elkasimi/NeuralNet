@@ -56,8 +56,8 @@ public:
 
     void move( );
     void generate_new_food( );
-    void display( );
-    bool end_game( );
+    void display( ) const;
+    bool end_game( ) const;
     std::vector< double > get_neural_net_input( ) const;
     std::vector< Direction > get_possible_directions( ) const;
 
