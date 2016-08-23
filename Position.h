@@ -1,5 +1,4 @@
-#ifndef POSITION_H
-#define POSITION_H
+#pragma once
 
 #include <vector>
 
@@ -71,5 +70,3 @@ private:
     Square m_food;
     Direction m_direction;
 };
-
-#endif
