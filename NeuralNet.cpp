@@ -73,7 +73,7 @@ NeuralNet::NeuralNet( )
 }
 
 NeuralNet::NeuralNet( int32_t num_inputs, int32_t num_hidden )
-    : m_num_inputs( num_hidden )
+    : m_num_inputs( num_inputs )
     , m_num_hidden( num_hidden ? num_hidden : ( num_inputs / 2 + 1 ) )
     , m_fitness( 0.0 )
 
@@ -237,20 +237,17 @@ operator==( const NeuralNet& lhs, const NeuralNet& rhs )
 {
     if ( lhs.m_num_inputs != rhs.m_num_inputs )
     {
-        std::cout << "different number of inputs" << std::endl;
         return false;
     }
 
     if ( lhs.m_num_hidden != rhs.m_num_hidden )
     {
-        std::cout << "different number of hidden nodes" << std::endl;
         return false;
     }
 
     int32_t total_weights = (int32_t)lhs.m_weights.size( );
     if ( total_weights != ( (int32_t)rhs.m_weights.size( ) ) )
     {
-        std::cout << "total weights differents" << std::endl;
         return false;
     }
 
@@ -258,8 +255,6 @@ operator==( const NeuralNet& lhs, const NeuralNet& rhs )
     {
         if ( !are_equal_with_epsilon( lhs.m_weights[ i ], rhs.m_weights[ i ] ) )
         {
-            std::cout << i + 1 << "th weights are different " << lhs.m_weights[ i ] << " # "
-                      << rhs.m_weights[ i ] << std::endl;
             return false;
         }
     }

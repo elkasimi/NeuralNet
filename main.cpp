@@ -75,12 +75,9 @@ run_simulation( )
         {
             for ( const auto& second_neural_net : best_neural_nets )
             {
-                auto first_baby = first_neural_net * second_neural_net;
-                auto second_baby = second_neural_net * first_neural_net;
-                first_baby.mutate( );
-                second_baby.mutate( );
-                neural_nets.push_back( first_baby );
-                neural_nets.push_back( second_baby );
+                auto baby = first_neural_net * second_neural_net;
+                baby.mutate( );
+                neural_nets.push_back( baby );
             }
         }
 
@@ -98,7 +95,7 @@ run_simulation( )
                 // position.display();
             }
 
-            auto fitness = position.get_score( ) + 0.001 * position.get_life( );
+            auto fitness = position.get_score( ) + 0.01 * position.get_life( );
             neural_net.set_fitness( fitness );
         }
 
@@ -161,7 +158,7 @@ main( int argc, char* argv[] )
     }
     else
     {
-        auto neural_net = NeuralNet::load( names.front( ) );
+        const auto neural_net = NeuralNet::load( names.front( ) );
         Position position( WIDTH, HEIGTH );
         while ( !position.end_game( ) )
         {
@@ -171,8 +168,6 @@ main( int argc, char* argv[] )
             position.display( );
             std::this_thread::sleep_for( TICK_TIME );
         }
-        std::cout << "score = " << position.get_score( ) << ", life = " << position.get_life( )
-                  << std::endl;
     }
 
     return 0;
