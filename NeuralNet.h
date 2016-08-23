@@ -21,14 +21,15 @@ public:
     int32_t get_num_hidden( ) const;
     double get_fitness( ) const;
     void set_fitness( double val );
-    double activate( const std::vector< double >& v ) const;
+    double activate( const std::vector< double >& input ) const;
     void mutate( );
     bool save( const std::string& file_name ) const;
     static NeuralNet load( const std::string& file_name );
 
-    friend NeuralNet operator*( const NeuralNet& nn1, const NeuralNet& nn2 );
-    friend bool operator==( const NeuralNet& nn1, const NeuralNet& nn2 );
-    friend std::ostream& operator<<( std::ostream& out, NeuralNet& nn );
+    friend NeuralNet operator*( const NeuralNet& lhs, const NeuralNet& rhs );
+    friend bool operator==( const NeuralNet& lhs, const NeuralNet& rhs );
+    friend std::ostream& operator<<( std::ostream& out,
+                                     const NeuralNet& neural_net );
 
 private:
     std::vector< double > m_weights;
