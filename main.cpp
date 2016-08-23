@@ -35,31 +35,21 @@ init_simulation( )
 void
 compute_xor_error( NeuralNet& neural_net )
 {
-    double error = 0.0;
-    std::vector< double > inputs;
-    inputs.push_back( 0.0 );
-    inputs.push_back( 0.0 );
-    double a = neural_net.activate( inputs );
-    error += 10000 * a * a;
-    //////////////////
-    inputs.clear( );
-    inputs.push_back( 1.0 );
-    inputs.push_back( 1.0 );
-    a = neural_net.activate( inputs );
-    error += 10000 * a * a;
-    //////////////////
-    inputs.clear( );
-    inputs.push_back( 0.0 );
-    inputs.push_back( 1.0 );
-    a = neural_net.activate( inputs );
-    error += 10000 * ( a - 1 ) * ( a - 1 );
-    //////////////////
-    inputs.clear( );
-    inputs.push_back( 1.0 );
-    inputs.push_back( 0.0 );
-    a = neural_net.activate( inputs );
-    error += 10000 * ( a - 1 ) * ( a - 1 );
-    double fitness = 1 / error;
+    auto error = 1.0;
+
+    auto a = neural_net.activate( {0.0, 0.0} );
+    error += 10000.0 * a * a;
+
+    a = neural_net.activate( {1.0, 1.0} );
+    error += 10000.0 * a * a;
+
+    a = neural_net.activate( {0.0, 1.0} );
+    error += 10000.0 * ( a - 1 ) * ( a - 1 );
+
+    a = neural_net.activate( {1.0, 0.0} );
+    error += 10000.0 * ( a - 1 ) * ( a - 1 );
+
+    auto fitness = 1.0 / error;
     neural_net.set_fitness( fitness );
 }
 
@@ -81,12 +71,12 @@ run_simulation( )
     {
         std::cout << "Generation " << g + 1 << std::endl;
         std::vector< NeuralNet > neural_nets;
-        for ( int32_t i = 0; i < N; ++i )
+        for ( const auto& first_neural_net : neural_nets )
         {
-            for ( int32_t j = i + 1; j < N; ++j )
+            for ( const auto& second_neural_net : neural_nets )
             {
-                NeuralNet first_baby = base[ i ] * base[ j ];
-                NeuralNet second_baby = base[ j ] * base[ i ];
+                auto first_baby = first_neural_net * second_neural_net;
+                auto second_baby = second_neural_net * first_neural_net;
                 first_baby.mutate( );
                 second_baby.mutate( );
                 neural_nets.push_back( first_baby );
@@ -103,8 +93,9 @@ run_simulation( )
             Position position( WIDTH, HEIGTH );
             while ( !position.end_game( ) )
             {
-                Direction dir = AI::get_best_direction( position, neural_net );
-                position.set_direction( dir );
+                const auto direction
+                    = AI::get_best_direction( position, neural_net );
+                position.set_direction( direction );
                 position.move( );
                 // position.display();
             }
@@ -166,18 +157,18 @@ main( )
     }
     else
     {
-        NeuralNet nn = NeuralNet::load( names[ 0 ] );
-        Position pos( WIDTH, HEIGTH );
-        while ( !pos.end_game( ) )
+        auto neural_net = NeuralNet::load( names.front( ) );
+        Position position( WIDTH, HEIGTH );
+        while ( !position.end_game( ) )
         {
-            Direction dir = AI::get_best_direction( pos, nn );
-            pos.set_direction( dir );
-            pos.move( );
-            pos.display( );
+            auto direction = AI::get_best_direction( position, neural_net );
+            position.set_direction( direction );
+            position.move( );
+            position.display( );
             std::this_thread::sleep_for( TICK_TIME );
         }
-        std::cout << "score = " << pos.get_score( )
-                  << ", life = " << pos.get_life( ) << std::endl;
+        std::cout << "score = " << position.get_score( )
+                  << ", life = " << position.get_life( ) << std::endl;
     }
 
     return 0;
