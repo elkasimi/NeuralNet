@@ -73,17 +73,17 @@ run_simulation( )
         base.push_back( NeuralNet::load( name ) );
     }
 
-    int epoches;
+    int32_t epoches;
     std::cout << "Please enter the number of generations:" << std::endl;
     std::cin >> epoches;
 
-    for ( int g = 0; g < epoches; ++g )
+    for ( int32_t g = 0; g < epoches; ++g )
     {
         std::cout << "Generation " << g + 1 << std::endl;
         std::vector< NeuralNet > neural_nets;
-        for ( int i = 0; i < N; ++i )
+        for ( int32_t i = 0; i < N; ++i )
         {
-            for ( int j = i + 1; j < N; ++j )
+            for ( int32_t j = i + 1; j < N; ++j )
             {
                 NeuralNet first_baby = base[ i ] * base[ j ];
                 NeuralNet second_baby = base[ j ] * base[ i ];
@@ -132,7 +132,7 @@ run_simulation( )
         if ( g == epoches - 1 )
         {
             std::cout << "Player\t\tFitness" << std::endl;
-            int i = 0;
+            int32_t i = 0;
             for ( const auto& neural_net : base )
             {
                 std::cout << ++i << "\t\t" << neural_net.get_fitness( )
@@ -142,7 +142,7 @@ run_simulation( )
     }
 }
 
-int
+int32_t
 main( )
 {
     std::string action;

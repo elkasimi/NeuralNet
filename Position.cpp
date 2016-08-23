@@ -10,7 +10,7 @@ namespace
 const int32_t MAX_LIFE = 1000;
 }
 
-Position::Position( int width, int heigth )
+Position::Position( int32_t width, int32_t heigth )
     : m_width( width )
     , m_heigth( heigth )
     , m_score( 0 )
@@ -21,13 +21,13 @@ Position::Position( int width, int heigth )
 {
 }
 
-int
+int32_t
 Position::get_width( ) const
 {
     return m_width;
 }
 
-int
+int32_t
 Position::get_heigth( ) const
 {
     return m_heigth;
@@ -39,13 +39,13 @@ Position::get_direction( ) const
     return m_direction;
 }
 
-int
+int32_t
 Position::get_score( ) const
 {
     return m_score;
 }
 
-int
+int32_t
 Position::get_life( ) const
 {
     return m_life;

@@ -19,7 +19,7 @@ struct Square
     {
     }
 
-    Square( int x, int y )
+    Square( int32_t x, int32_t y )
         : x( x )
         , y( y )
     {
@@ -37,20 +37,20 @@ struct Square
             return y < rhs.y;
         }
     }
-    int x;
-    int y;
+    int32_t x;
+    int32_t y;
 };
 
 class Position
 {
 public:
-    Position( int width, int heigth );
+    Position( int32_t width, int32_t heigth );
 
-    int get_width( ) const;
-    int get_heigth( ) const;
+    int32_t get_width( ) const;
+    int32_t get_heigth( ) const;
     Direction get_direction( ) const;
-    int get_score( ) const;
-    int get_life( ) const;
+    int32_t get_score( ) const;
+    int32_t get_life( ) const;
 
     void set_direction( Direction dir );
 
@@ -62,10 +62,10 @@ public:
     std::vector< Direction > get_possible_directions( ) const;
 
 private:
-    int m_width;
-    int m_heigth;
-    int m_score;
-    int m_life;
+    int32_t m_width;
+    int32_t m_heigth;
+    int32_t m_score;
+    int32_t m_life;
     Square m_snake;
     Square m_food;
     Direction m_direction;

@@ -72,7 +72,7 @@ NeuralNet::NeuralNet( )
 {
 }
 
-NeuralNet::NeuralNet( int num_inputs, int num_hidden )
+NeuralNet::NeuralNet( int32_t num_inputs, int32_t num_hidden )
 {
     m_num_inputs = num_inputs;
     if ( num_hidden == 0 )
@@ -81,20 +81,21 @@ NeuralNet::NeuralNet( int num_inputs, int num_hidden )
     }
     m_num_hidden = num_hidden;
     m_fitness = 0.0;
-    int totalWeights = ( m_num_inputs + 1 ) * m_num_hidden + m_num_hidden + 1;
-    for ( int i = 0; i < totalWeights; ++i )
+    int32_t totalWeights
+        = ( m_num_inputs + 1 ) * m_num_hidden + m_num_hidden + 1;
+    for ( int32_t i = 0; i < totalWeights; ++i )
     {
         m_weights.push_back( get_random_weight( ) );
     }
 }
 
-int
+int32_t
 NeuralNet::get_num_inputs( ) const
 {
     return m_num_inputs;
 }
 
-int
+int32_t
 NeuralNet::get_num_hidden( ) const
 {
     return m_num_hidden;
@@ -118,10 +119,10 @@ NeuralNet::activate( const std::vector< double >& v ) const
     auto it = m_weights.cbegin( );
     double x;
     std::vector< double > tmp;
-    for ( int i = 0; i < m_num_hidden; ++i )
+    for ( int32_t i = 0; i < m_num_hidden; ++i )
     {
         x = 0.0;
-        for ( int j = 0; j < m_num_inputs; ++j )
+        for ( int32_t j = 0; j < m_num_inputs; ++j )
         {
             x += ( *it++ ) * v[ j ];
         }
@@ -130,7 +131,7 @@ NeuralNet::activate( const std::vector< double >& v ) const
     }
 
     x = 0.0;
-    for ( int j = 0; j < m_num_hidden; ++j )
+    for ( int32_t j = 0; j < m_num_hidden; ++j )
     {
         x += tmp[ j ] * ( *it++ );
     }
@@ -168,10 +169,10 @@ NeuralNet::save( const std::string& file_name ) const
     else
     {
         // std::cerr << "Saving neural net to file "<< fileName << std::endl;
-        out.write( (char*)&m_num_inputs, sizeof( int ) );
-        out.write( (char*)&m_num_hidden, sizeof( int ) );
-        int totalWeights = m_weights.size( );
-        for ( int i = 0; i < totalWeights; ++i )
+        out.write( (char*)&m_num_inputs, sizeof( int32_t ) );
+        out.write( (char*)&m_num_hidden, sizeof( int32_t ) );
+        int32_t totalWeights = m_weights.size( );
+        for ( int32_t i = 0; i < totalWeights; ++i )
         {
             out.write( (char*)&m_weights[ i ], sizeof( double ) );
         }
@@ -194,11 +195,11 @@ NeuralNet::load( const std::string& file_name )
     else
     {
         std::cerr << "loading neural net from file " << file_name << std::endl;
-        in.read( (char*)&nn.m_num_inputs, sizeof( int ) );
-        in.read( (char*)&nn.m_num_hidden, sizeof( int ) );
-        int totalWeights
+        in.read( (char*)&nn.m_num_inputs, sizeof( int32_t ) );
+        in.read( (char*)&nn.m_num_hidden, sizeof( int32_t ) );
+        int32_t totalWeights
             = ( nn.m_num_inputs + 1 ) * nn.m_num_hidden + nn.m_num_hidden + 1;
-        for ( int i = 0; i < totalWeights; ++i )
+        for ( int32_t i = 0; i < totalWeights; ++i )
         {
             double x;
             in.read( (char*)&x, sizeof( double ) );
@@ -215,7 +216,7 @@ NeuralNet operator*( const NeuralNet& lhs, const NeuralNet& rhs )
     NeuralNet baby;
     baby.m_num_inputs = lhs.m_num_inputs;
     baby.m_num_hidden = lhs.m_num_hidden;
-    int totalWeights = lhs.m_weights.size( );
+    int32_t totalWeights = lhs.m_weights.size( );
     auto ratio = 0.5;
     const auto lhs_fitness = lhs.get_fitness( );
     const auto rhs_fitness = rhs.get_fitness( );
@@ -225,7 +226,7 @@ NeuralNet operator*( const NeuralNet& lhs, const NeuralNet& rhs )
         ratio = lhs_fitness / sum_fitness;
     }
 
-    for ( int i = 0; i < totalWeights; ++i )
+    for ( int32_t i = 0; i < totalWeights; ++i )
     {
         double r = get_random_number( );
         if ( r < ratio )
@@ -254,13 +255,13 @@ operator==( const NeuralNet& nn1, const NeuralNet& nn2 )
         std::cout << "different number of hidden nodes" << std::endl;
         return false;
     }
-    int totalWeights = (int)nn1.m_weights.size( );
-    if ( totalWeights != ( (int)nn2.m_weights.size( ) ) )
+    int32_t totalWeights = (int32_t)nn1.m_weights.size( );
+    if ( totalWeights != ( (int32_t)nn2.m_weights.size( ) ) )
     {
         std::cout << "total weights differents" << std::endl;
         return false;
     }
-    for ( int i = 0; i < totalWeights; ++i )
+    for ( int32_t i = 0; i < totalWeights; ++i )
     {
         if ( fabs( nn1.m_weights[ i ] - nn2.m_weights[ i ] ) > 1e-15 )
         {
@@ -279,15 +280,15 @@ operator<<( std::ostream& out, NeuralNet& nn )
 {
     out << nn.m_num_inputs << " " << nn.m_num_hidden << std::endl;
     std::vector< double >::iterator it = nn.m_weights.begin( );
-    for ( int i = 0; i < nn.m_num_hidden; ++i )
+    for ( int32_t i = 0; i < nn.m_num_hidden; ++i )
     {
-        for ( int j = 0; j <= nn.m_num_inputs; ++j )
+        for ( int32_t j = 0; j <= nn.m_num_inputs; ++j )
         {
             out << *it++ << " ";
         }
         out << std::endl;
     }
-    for ( int i = 0; i <= nn.m_num_hidden; ++i )
+    for ( int32_t i = 0; i <= nn.m_num_hidden; ++i )
     {
         out << *it++ << " ";
     }

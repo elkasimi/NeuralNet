@@ -15,10 +15,10 @@ class NeuralNet
 public:
     NeuralNet( );
 
-    NeuralNet( int num_inputs, int num_hidden = 0 );
+    NeuralNet( int32_t num_inputs, int32_t num_hidden = 0 );
 
-    int get_num_inputs( ) const;
-    int get_num_hidden( ) const;
+    int32_t get_num_inputs( ) const;
+    int32_t get_num_hidden( ) const;
     double get_fitness( ) const;
     void set_fitness( double val );
     double activate( const std::vector< double >& v ) const;
@@ -32,7 +32,7 @@ public:
 
 private:
     std::vector< double > m_weights;
-    int m_num_inputs;
-    int m_num_hidden;
+    int32_t m_num_inputs;
+    int32_t m_num_hidden;
     double m_fitness;
 };
