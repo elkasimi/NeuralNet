@@ -151,7 +151,7 @@ NeuralNet::mutate( )
 bool
 NeuralNet::save( const std::string& file_name ) const
 {
-    std::cerr << "saving neural net to " << file_name << std::endl;
+    // std::cerr << "saving neural net to " << file_name << std::endl;
 
     std::ofstream out( file_name.c_str( ), std::ios::out | std::ios::binary );
     if ( !out )
@@ -176,7 +176,7 @@ NeuralNet::save( const std::string& file_name ) const
 NeuralNet
 NeuralNet::load( const std::string& file_name )
 {
-    std::cerr << "loading neural net from " << file_name << std::endl;
+    // std::cerr << "loading neural net from " << file_name << std::endl;
     NeuralNet neural_net;
     std::ifstream in( file_name.c_str( ), std::ios::in | std::ios::binary );
     if ( !in )

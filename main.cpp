@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <chrono>
+#include <functional>
 #include <iostream>
 #include <string>
 #include <thread>
@@ -11,48 +12,86 @@
 
 namespace
 {
-const int32_t NEURAL_NET_INPUTS = 8;
+const bool XOR_TEST = true;
+const int32_t NEURAL_NET_INPUTS = XOR_TEST ? 2 : 8;
 const int32_t WIDTH = 10;
 const int32_t HEIGTH = 10;
 const int32_t N = 10;
 const auto TICK_TIME = std::chrono::milliseconds( 80 );
-const auto EPOCHES_BETWEEN_DISPLAYS = 1;
+const auto EPOCHES_BETWEEN_DISPLAYS = 1000;
 const std::vector< std::string > names{
-    "game0.nn", "game1.nn", "game2.nn", "game3.nn", "game4.nn",
-    "game5.nn", "game6.nn", "game7.nn", "game8.nn", "game9.nn",
-};
-}
+    "candidate0.nn", "candidate1.nn", "candidate2.nn", "candidate3.nn", "candidate4.nn",
+    "candidate5.nn", "candidate6.nn", "candidate7.nn", "candidate8.nn", "candidate9.nn"};
+const auto THRESHOLD = 0.5;
+const std::vector< std::vector< double > > XOR_INPUTS{
+    {0.0, 0.0}, {0.0, 1.0}, {1.0, 0.0}, {1.0, 1.0}};
 
 void
 init_simulation( )
 {
     for ( const auto& name : names )
     {
-        NeuralNet neural_net( NEURAL_NET_INPUTS );
-        neural_net.save( name );
+        NeuralNet( NEURAL_NET_INPUTS ).save( name );
     }
 }
 
 void
-compute_xor_error( NeuralNet& neural_net )
+compute_xor_fitness( NeuralNet& neural_net )
 {
-    auto error = 1.0;
+    auto error = 0.0;
+    for ( const auto& input : XOR_INPUTS )
+    {
+        error += neural_net.activate( input ) >= THRESHOLD;
+    }
 
-    auto a = neural_net.activate( {0.0, 0.0} );
-    error += 10000.0 * a * a;
-
-    a = neural_net.activate( {1.0, 1.0} );
-    error += 10000.0 * a * a;
-
-    a = neural_net.activate( {0.0, 1.0} );
-    error += 10000.0 * ( a - 1 ) * ( a - 1 );
-
-    a = neural_net.activate( {1.0, 0.0} );
-    error += 10000.0 * ( a - 1 ) * ( a - 1 );
-
-    auto fitness = 1.0 / error;
+    auto fitness = -error;
     neural_net.set_fitness( fitness );
 }
+
+void
+compute_snake_game_fitness( NeuralNet& neural_net )
+{
+    Position position( WIDTH, HEIGTH );
+    while ( !position.end_game( ) )
+    {
+        const auto direction = AI::get_best_direction( position, neural_net );
+        position.set_direction( direction );
+        position.move( );
+    }
+
+    auto fitness = position.get_score( ) + 0.01 * position.get_life( );
+    neural_net.set_fitness( fitness );
+}
+
+void
+test_snake_game( const NeuralNet& neural_net )
+{
+    Position position( WIDTH, HEIGTH );
+    while ( !position.end_game( ) )
+    {
+        auto direction = AI::get_best_direction( position, neural_net );
+        position.set_direction( direction );
+        position.move( );
+        position.display( );
+        std::this_thread::sleep_for( TICK_TIME );
+    }
+}
+
+void
+test_xor( const NeuralNet& neural_net )
+{
+    for ( const auto& input : XOR_INPUTS )
+    {
+        std::cout << "(" << input[ 0 ] << ", " << input[ 1 ] << ") "
+                  << ( neural_net.activate( input ) >= THRESHOLD ) << std::endl;
+    }
+}
+
+using FitnessFunction = std::function< void( NeuralNet& ) >;
+FitnessFunction compute_fitness = XOR_TEST ? &compute_xor_fitness : &compute_snake_game_fitness;
+
+using TestFunction = std::function< void( const NeuralNet& ) >;
+TestFunction test_function = XOR_TEST ? &test_xor : &test_snake_game;
 
 void
 run_simulation( )
@@ -86,17 +125,7 @@ run_simulation( )
 
         for ( auto& neural_net : neural_nets )
         {
-            Position position( WIDTH, HEIGTH );
-            while ( !position.end_game( ) )
-            {
-                const auto direction = AI::get_best_direction( position, neural_net );
-                position.set_direction( direction );
-                position.move( );
-                // position.display();
-            }
-
-            auto fitness = position.get_score( ) + 0.01 * position.get_life( );
-            neural_net.set_fitness( fitness );
+            compute_fitness( neural_net );
         }
 
         std::sort( neural_nets.begin( ), neural_nets.end( ),
@@ -134,17 +163,18 @@ run_simulation( )
         }
     }
 }
+}
 
 int
 main( int argc, char* argv[] )
 {
     std::string action;
-    std::cout << "Please enter action (init/simulation/game) :" << std::endl;
+    std::cout << "Please enter action (init/simulation/test) :" << std::endl;
     std::cin >> action;
 
-    while ( action != "init" && action != "simulation" && action != "game" )
+    while ( action != "init" && action != "simulation" && action != "test" )
     {
-        std::cout << "Please enter action (init/simulation/game) :" << std::endl;
+        std::cout << "Please enter action (init/simulation/test) :" << std::endl;
         std::cin >> action;
     }
 
@@ -159,15 +189,7 @@ main( int argc, char* argv[] )
     else
     {
         const auto neural_net = NeuralNet::load( names.front( ) );
-        Position position( WIDTH, HEIGTH );
-        while ( !position.end_game( ) )
-        {
-            auto direction = AI::get_best_direction( position, neural_net );
-            position.set_direction( direction );
-            position.move( );
-            position.display( );
-            std::this_thread::sleep_for( TICK_TIME );
-        }
+        test_function( neural_net );
     }
 
     return 0;
