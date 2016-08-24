@@ -39,6 +39,7 @@ install cmake and build-essentials
 $sudo apt-get install cmake build-essentials
 
 $cmake .
+
 $make
 
 #Run
