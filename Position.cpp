@@ -281,7 +281,6 @@ Position::get_neural_net_input( ) const
 std::vector< Direction >
 Position::get_possible_directions( ) const
 {
-    std::vector< Direction > res;
     switch ( m_direction )
     {
     case Direction::RIGHT:
