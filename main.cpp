@@ -23,8 +23,13 @@ const std::vector< std::string > names{
     "candidate0.nn", "candidate1.nn", "candidate2.nn", "candidate3.nn", "candidate4.nn",
     "candidate5.nn", "candidate6.nn", "candidate7.nn", "candidate8.nn", "candidate9.nn"};
 const auto THRESHOLD = 0.5;
-const std::vector< std::vector< double > > XOR_INPUTS{
-    {0.0, 0.0}, {0.0, 1.0}, {1.0, 0.0}, {1.0, 1.0}};
+struct XORData
+{
+    std::vector< double > input;
+    double output;
+};
+const std::vector< XORData > XOR_TESTS{
+    {{0.0, 0.0}, 0.0}, {{0.0, 1.0}, 1.0}, {{1.0, 0.0}, 1.0}, {{1.0, 1.0}, 0.0}};
 
 void
 init_simulation( )
@@ -39,9 +44,16 @@ void
 compute_xor_fitness( NeuralNet& neural_net )
 {
     auto error = 0.0;
-    for ( const auto& input : XOR_INPUTS )
+    for ( const auto& xor_data : XOR_TESTS )
     {
-        error += neural_net.activate( input ) >= THRESHOLD;
+        if ( neural_net.activate( xor_data.input ) >= THRESHOLD )
+        {
+            error += std::fabs( xor_data.output - 1.0 );
+        }
+        else
+        {
+            error += std::fabs( xor_data.output );
+        }
     }
 
     auto fitness = -error;
@@ -80,10 +92,10 @@ test_snake_game( const NeuralNet& neural_net )
 void
 test_xor( const NeuralNet& neural_net )
 {
-    for ( const auto& input : XOR_INPUTS )
+    for ( const auto& xor_data : XOR_TESTS )
     {
-        std::cout << "(" << input[ 0 ] << ", " << input[ 1 ] << ") "
-                  << ( neural_net.activate( input ) >= THRESHOLD ) << std::endl;
+        std::cout << "(" << xor_data.input[ 0 ] << ", " << xor_data.input[ 1 ] << ") "
+                  << ( neural_net.activate( xor_data.input ) >= THRESHOLD ) << std::endl;
     }
 }
 
@@ -109,6 +121,7 @@ run_simulation( )
 
     for ( int32_t g = 0; g < epoches; ++g )
     {
+        std::cout << "Generation " << g + 1 << std::endl;
         std::vector< NeuralNet > neural_nets;
         for ( const auto& first_neural_net : best_neural_nets )
         {
